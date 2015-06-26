@@ -88,7 +88,14 @@ namespace SolrQueryBuilder
 
         public SolrQ<T> SelfNot()
         {
-            m_SB.Insert(0, "!( ");
+            ToSub();
+            m_SB.Insert(0, "!");
+            return this;
+        }
+
+        public SolrQ<T> ToSub()
+        {
+            m_SB.Insert(0, "( ");
             m_SB.Append(" )");
             return this;
         }
