@@ -13,7 +13,7 @@ namespace SolrQueryBuilder
 
         public SolrQ(Expression<Func<T, object>> expr, Func<SolrQOperation, Func<string, string>> opFunc)
         {
-            AddCondition(Utils.GetPropertyName(expr), opFunc);
+            AddCondition(SolrQ.GetPropertyName(expr), opFunc);
         }
 
         public SolrQ(string field, Func<SolrQOperation, Func<string, string>> opFunc)
@@ -40,7 +40,7 @@ namespace SolrQueryBuilder
 
         public SolrQ<T> And(Expression<Func<T, object>> expr, Func<SolrQOperation, Func<string, string>> opFunc)
         {
-            return And(Utils.GetPropertyName(expr), opFunc);
+            return And(SolrQ.GetPropertyName(expr), opFunc);
         }
 
         public SolrQ<T> And(string field, Func<SolrQOperation, Func<string, string>> opFunc)
@@ -64,7 +64,7 @@ namespace SolrQueryBuilder
 
         public SolrQ<T> OR(Expression<Func<T, object>> expr, Func<SolrQOperation, Func<string, string>> opFunc)
         {
-            return OR(Utils.GetPropertyName(expr), opFunc);
+            return OR(SolrQ.GetPropertyName(expr), opFunc);
         }
 
         public SolrQ<T> OR(string field, Func<SolrQOperation, Func<string, string>> opFunc)

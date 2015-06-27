@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace SolrQueryBuilder
@@ -33,24 +34,44 @@ namespace SolrQueryBuilder
             Func<object, string, object> result = null;
 
             var newType = typeof(T);
-            var x = System.Linq.Expressions.Expression.Parameter(typeof(object), "x");
-            var y = System.Linq.Expressions.Expression.Parameter(typeof(string), "y");
-            var hash = System.Linq.Expressions.Expression.Variable(typeof(int), "hash");
-            var calHash = System.Linq.Expressions.Expression.Assign(hash, System.Linq.Expressions.Expression.Call(y, typeof(object).GetMethod("GetHashCode")));
-            var cases = new List<System.Linq.Expressions.SwitchCase>();
+            var x = Expression.Parameter(typeof(object), "x");
+            var y = Expression.Parameter(typeof(string), "y");
+            var hash = Expression.Variable(typeof(int), "hash");
+            var calHash = Expression.Assign(hash, Expression.Call(y, typeof(object).GetMethod("GetHashCode")));
+            var cases = new List<SwitchCase>();
             foreach (var propertyInfo in newType.GetProperties())
             {
-                var property = System.Linq.Expressions.Expression.Property(System.Linq.Expressions.Expression.Convert(x, newType), propertyInfo.Name);
-                var propertyHash = System.Linq.Expressions.Expression.Constant(propertyInfo.Name.GetHashCode(), typeof(int));
+                var property = Expression.Property(Expression.Convert(x, newType), propertyInfo.Name);
+                var propertyHash = Expression.Constant(propertyInfo.Name.GetHashCode(), typeof(int));
 
-                cases.Add(System.Linq.Expressions.Expression.SwitchCase(System.Linq.Expressions.Expression.Convert(property, typeof(object)), propertyHash));
+                cases.Add(Expression.SwitchCase(Expression.Convert(property, typeof(object)), propertyHash));
             }
-            var switchEx = System.Linq.Expressions.Expression.Switch(hash, System.Linq.Expressions.Expression.Constant(null), cases.ToArray());
-            var methodBody = System.Linq.Expressions.Expression.Block(typeof(object), new[] { hash }, calHash, switchEx);
+            var switchEx = Expression.Switch(hash, Expression.Constant(null), cases.ToArray());
+            var methodBody = Expression.Block(typeof(object), new[] { hash }, calHash, switchEx);
 
-            result = System.Linq.Expressions.Expression.Lambda<Func<object, string, object>>(methodBody, x, y).Compile();
+            result = Expression.Lambda<Func<object, string, object>>(methodBody, x, y).Compile();
 
             return result;
+        }
+
+        public static Func<string, string> GetSolrFiledNameFunc(Type type, Type attributeType)
+        {
+            var x = Expression.Parameter(typeof(string), "x");
+            var hash = Expression.Variable(typeof(int), "hash");
+            var calHash = Expression.Assign(hash, Expression.Call(x, typeof(string).GetMethod("GetHashCode")));
+            var cases = new List<SwitchCase>();
+            foreach (var propertyInfo in type.GetProperties())
+            {
+                var atts = propertyInfo.GetCustomAttributes(attributeType, true);
+                if (atts == null || atts.Length == 0)
+                    continue;
+                var propertyHash = Expression.Constant(propertyInfo.Name.GetHashCode(), typeof(int));
+                var property = Expression.Property(Expression.Constant(atts.First(), attributeType), "FieldName");
+                cases.Add(Expression.SwitchCase(Expression.Convert(property, typeof(string)), propertyHash));
+            }
+            var switchEx = Expression.Switch(hash, Expression.Constant(string.Empty), cases.ToArray());
+            var methodBody = Expression.Block(typeof(string), new[] { hash }, calHash, switchEx);
+            return Expression.Lambda<Func<string, string>>(methodBody, x).Compile();
         }
     }
 }

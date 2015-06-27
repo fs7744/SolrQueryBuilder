@@ -14,6 +14,19 @@ var q = SolrQ.Query<Student>(i => i.Name)(op => op.Equal("a"))
 Assert.AreEqual("Name:a AND Age:3 AND Name:g\\ g* AND ( Name:88 OR Name:66 ) AND ( Age:77 OR nAME:(a b) )", q.ToString());
 ```
 
+如果solr的定义与c#中属性不同，请使用如下方式：
+```
+//使用solr定义名
+SolrQ.UpdateSolrFieldAttribute<SolrFieldAttribute>();
+Assert.AreEqual("A:a AND B:3", SolrQ.Query<Student>(i => i.Name)(op => op.Equal("a"))
+	.And(i => i.Age, op => op.Equal("3")).ToString());
+
+//使用c#属性名
+SolrQ.ClearSolrFieldAttribute();
+Assert.AreEqual("Name:a AND Age:3", SolrQ.Query<Student>(i => i.Name)(op => op.Equal("a"))
+	.And(i => i.Age, op => op.Equal("3")).ToString());
+```
+
 ## Nuget
 
-https://www.nuget.org/packages/SolrQueryBuilder/0.1.0
+https://www.nuget.org/packages/SolrQueryBuilder
