@@ -19,6 +19,11 @@ namespace SolrQueryBuilder
             return string.IsNullOrEmpty(value) ? "\"\"" : ReplaceSpecialSign(value);
         }
 
+        private string GetIntervalValue(string value)
+        {
+            return "\"" + value + "\"";
+        }
+
         private string ReplaceSpecialSign(string value)
         {
             var result = new StringBuilder(value);
@@ -49,7 +54,7 @@ namespace SolrQueryBuilder
 
         public Func<string, string> Between(string from, string to)
         {
-            return field => string.Format("{0}:[{1} TO {2}]", field, GetNullOrValue(from), GetNullOrValue(to));
+            return field => string.Format("{0}:[{1} TO {2}]", field, GetIntervalValue(from), GetIntervalValue(to));
         }
 
         public Func<string, string> NotBetween(string from, string to)
@@ -69,22 +74,22 @@ namespace SolrQueryBuilder
 
         public Func<string, string> Less(string value)
         {
-            return field => string.Format("{0}:{* TO {1}}", field, GetNullOrValue(value));
+            return field => string.Format("{0}:{* TO {1}}", field, GetIntervalValue(value));
         }
 
         public Func<string, string> Greater(string value)
         {
-            return field => field + ":{" + GetNullOrValue(value) + " TO *}";
+            return field => field + ":{" + GetIntervalValue(value) + " TO *}";
         }
 
         public Func<string, string> LessOrEqual(string value)
         {
-            return field => string.Format("{0}:[* TO {1}]", field, GetNullOrValue(value));
+            return field => string.Format("{0}:[* TO {1}]", field, GetIntervalValue(value));
         }
 
         public Func<string, string> GreaterOrEqual(string value)
         {
-            return field => string.Format("{0}:[{1} TO *]", field, GetNullOrValue(value));
+            return field => string.Format("{0}:[{1} TO *]", field, GetIntervalValue(value));
         }
 
         public Func<string, string> NotNull()
