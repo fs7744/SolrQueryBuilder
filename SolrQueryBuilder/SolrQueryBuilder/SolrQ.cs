@@ -50,6 +50,13 @@ namespace SolrQueryBuilder
             return this;
         }
 
+        public SolrQ<T> And(string query)
+        {
+            m_SB.Append(" AND ");
+            m_SB.Append(query);
+            return this;
+        }
+
         public SolrQ<T> AndSub(string query)
         {
             m_SB.AppendFormat(" AND ( {0} )", query);
